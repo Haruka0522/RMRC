@@ -1,0 +1,7 @@
+opencv_traincascade -data <カスケードファイルの保存先> -vec <createsampleでつくったベクトルファイルのパス> -bg <ネガティブ画像のリスト> -numPos <ポジティブ画像の数> -numNeg <ネガティブ画像の数> -featureType LBP -w 72 -h 72
+
+opencv_traincascade -data /home/haruka/RMRC/1.1-explosives/cascade/trained_data_V6/ -vec /home/haruka/RMRC/1.1-explosives/vec/1.1-explosives.vec -bg /home/haruka/RMRC/1.1-explosives/nglist.txt -numPos 4200 -numNeg 4146 -featureType LBP -w 72 -h 72
+
+
+cd ~/RMRC/1.1-explosives/
+opencv_createsamples -info ./pos3/1.1-explosives-info3.txt -vec ./vec/1.1-explosives.vec -num 1570 -w 72 -h 72
