@@ -20,6 +20,6 @@ def detect(imagefilename, cascadefilename):
 images = ['1267_0113_0011_0102_0102.jpg','IMG_20190615_070527.jpg','IMG_20190615_071623.jpg','IMG_20190620_163814.jpg']
 if __name__ == '__main__':
     for num,img in enumerate(images):
-    	result = detect(img, './cascade/trained_data_V9/cascade.xml')
-    	cv.imwrite('V9_result'+str(num)+'.jpg', result)
+    	result = detect(img, './cascade/trained_data_V10/cascade.xml')
+    	cv.imwrite('V10_result'+str(num)+'.jpg', result)
 
