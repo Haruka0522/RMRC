@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 
-path = "/home/haruka/RMRC/resized-HazmatPlacards/"
-save_path = "/home/haruka/RMRC/increased-picture/"
+path = "/home/haruka/RMRC/cascade2/background/"
+save_path = "/home/haruka/RMRC/cascade2/backgrounds/"
 rotation_angle = [0,45,90,135,180,225,270,315]
 original_img_list = os.listdir(path)
 
@@ -92,18 +92,19 @@ if __name__ == '__main__':
     if not os.path.exists(save_path):
         os.mkdir(save_path)
     num = 0
-    for original_img in original_img_list:
+    for num,original_img in enumerate(original_img_list):
         img = cv2.imread(path+"/"+original_img,1)
         converted_img = []
-        for angle in rotation_angle:
-            rotated_img = Rotation(img,angle)
-            converted_img.append(rotated_img)
-            converted_img.append(HighContrast(rotated_img))
-            converted_img.append(LowContrast(rotated_img))
-            converted_img.append(Smoosing(rotated_img))
-            converted_img.append(GaussianNoise(rotated_img))
-            converted_img.append(SaltNoise(rotated_img))
-            converted_img.append(PepperNoise(rotated_img))
+        rotated_img = img #
+        #for angle in rotation_angle:
+            #rotated_img = Rotation(img,angle)
+            #converted_img.append(rotated_img)
+        converted_img.append(HighContrast(rotated_img))
+        converted_img.append(LowContrast(rotated_img))
+        converted_img.append(Smoosing(rotated_img))
+        converted_img.append(GaussianNoise(rotated_img))
+        converted_img.append(SaltNoise(rotated_img))
+        converted_img.append(PepperNoise(rotated_img))
 
-    for num,img in enumerate(converted_img):
-        cv2.imwrite(save_path + str(num) + ".jpg",img)
+        for n,img in enumerate(converted_img):
+            cv2.imwrite(save_path + str(n)+str(num) + ".jpg",img)
