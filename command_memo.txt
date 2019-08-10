@@ -8,4 +8,5 @@ cd ~/RMRC/1.1-explosives/
 opencv_createsamples -img ../../カスケード分類器\(失敗）/increased-image/1.1-explosives/0.jpg -info ./pos/1.1-explosives-info.txt -bg ../backgrounds-list.txt -w 72 -h 72 -bgcolor 255 -maxxangle 0.6 -maxyangle 0.6 -maxzangle 2.3
 
 //ベクトルファイルの生成
-opencv_createsamples -info ./1.1-explosives-info.txt -bg ./nglist.txt -vec ./vec/1.1-explosives_V2.vec -num 6710 -w 72 -h 72
+opencv_createsamples -info ./pos/1.1-explosives-info.txt -bg ../backgrounds-list.txt -vec ./vec/1.1-explosives.vec -num 1000 -w 72 -h 72
+
