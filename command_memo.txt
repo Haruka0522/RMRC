@@ -5,6 +5,7 @@ opencv_traincascade -data /home/haruka/RMRC/1.1-explosives/cascade/trained_data_
 
 cd ~/RMRC/1.1-explosives/
 //ポジティブ画像の生成
-opencv_createsamples -img ../increased-image/1.1-explosives/14.jpg -info ./pos14/1.1-explosives-info14.txt -bg ../common-neg/com-nglist.txt -w 72 -h 72 -bgcolor 255 -maxxangle 0.6 -maxyangle 0.6 -maxzangle 2.3
+opencv_createsamples -img ../../カスケード分類器\(失敗）/increased-image/1.1-explosives/0.jpg -info ./pos/1.1-explosives-info.txt -bg ../backgrounds-list.txt -w 72 -h 72 -bgcolor 255 -maxxangle 0.6 -maxyangle 0.6 -maxzangle 2.3
+
 //ベクトルファイルの生成
 opencv_createsamples -info ./1.1-explosives-info.txt -bg ./nglist.txt -vec ./vec/1.1-explosives_V2.vec -num 6710 -w 72 -h 72
