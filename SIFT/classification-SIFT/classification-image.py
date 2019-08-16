@@ -56,8 +56,8 @@ for pt in cnts:
     cv2.rectangle(camera_img,(x,y),(x+w,y+h),(0,0,255),2)
 
 cv2.imwrite("a.png",camera_img)
-'''
 print(len(cnts))
+'''
 for pt in cnts:
     x,y,w,h = cv2.boundingRect(pt)
     if w > 100 and h > 100 and w < 800 and h < 378:   #輪郭の縦横が小さすぎたり大きすぎたりするものを弾く
