@@ -3,9 +3,7 @@ import cv2
 import os
 
 placards_path = "./hazmat-placards/"
-hazmat_placards = [placards_path + sign_name for sign_name in os.listdir(placards_path)]
 camera_img = cv2.imread("IMG_20190615_070527.jpg")
-ans = []
 result = []
 
 #hazmat_list = [(img1,name1),(img2,name2),・・・,(img26,name26)]
@@ -45,7 +43,7 @@ detector = cv2.xfeatures2d.SIFT_create()
 camera_gray = cv2.cvtColor(camera_img,cv2.COLOR_BGR2GRAY)
 
 #ブラーと２値化
-camera_blur = cv2.GaussianBlur(camera_gray,(7,7),0)
+camera_blur = cv2.GaussianBlur(camera_gray,(19,19),0)
 img2 = cv2.threshold(camera_blur,140,240,cv2.THRESH_BINARY_INV)[1]
 
 #輪郭検出
@@ -59,10 +57,10 @@ for pt in cnts:
 
 cv2.imwrite("a.png",camera_img)
 '''
-
+print(len(cnts))
 for pt in cnts:
     x,y,w,h = cv2.boundingRect(pt)
-    if w > 100 and h > 100 and w < 800 and h < 378:   #輪郭の縦横がそれぞれ100以上のときのみ正しいとする
+    if w > 100 and h > 100 and w < 800 and h < 378:   #輪郭の縦横が小さすぎたり大きすぎたりするものを弾く
         clipped = camera_gray[y:(y+h),x:(x+w)]
         #kp2,des2はカメラからの画像の特徴的な点の位置、特徴を表すベクトル
         kp2,des2 = detector.detectAndCompute(clipped,None)
