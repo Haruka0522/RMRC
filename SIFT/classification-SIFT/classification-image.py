@@ -91,5 +91,5 @@ for pt in cnts:
 #識別結果を画像に描画する
 for x,y,w,h,sign in result:
     cv2.rectangle(camera_img,(x,y),(x+w,y+h),(0,0,255),5)
-    cv2.putText(camera_img,sign,(x,y),cv2.FONT_HERSHEY_SIMPLEX,0.3,(200,0,0))
+    cv2.putText(camera_img,sign,(x,y),cv2.FONT_HERSHEY_SIMPLEX,0.5,(200,0,0))
 cv2.imwrite("result.jpg",camera_img)
