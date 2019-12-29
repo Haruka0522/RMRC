@@ -86,6 +86,7 @@ for pt in cnts:
             ans.append(len(good))
         
         result.append((x,y,w,h,hazmat_list[ans.index(max(ans))][1]))
+print(ans)
 
 
 #識別結果を画像に描画する

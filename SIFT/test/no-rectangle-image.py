@@ -3,7 +3,7 @@ import cv2
 import os
 
 placards_path = "./hazmat-placards/"
-camera_img = cv2.imread("IMG_20190615_070527.jpg")
+camera_img = cv2.imread("Screenshot from 2019-11-01 17-04-47.png")
 result = []
 
 #hazmat_list = [(img1,name1),(img2,name2),・・・,(img26,name26)]
