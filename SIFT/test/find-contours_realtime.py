@@ -17,7 +17,7 @@ while True:
     cnts = cv2.findContours(im2,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)[1]
     for pt in cnts:
         x,y,w,h = cv2.boundingRect(pt)
-        if w<100 or h<100:
+        if w<100 or h<100 or w == 800 or h == 600:
             continue
         print(x,y,w,h)
         cv2.rectangle(img,(x,y),(x+w,y+h),(0,0,255),2)
@@ -28,4 +28,4 @@ while True:
 
     print(capture.get(cv2.CAP_PROP_FPS))
 capture.release()
-cv2.destoryAllWindows()
+cv2.destroyAllWindows()
