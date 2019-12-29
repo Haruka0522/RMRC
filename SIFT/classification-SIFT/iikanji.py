@@ -2,18 +2,25 @@ import numpy as np
 import cv2
 from time import sleep
 import os
-import matplotlib.pyplot as plt
 
 #----------------------------------------------------
 #
 #syoki settei
 #
 #----------------------------------------------------
-GST_STR = 'nvarguscamerasrc \
-    ! video/x-raw(memory:NVMM), width=3280, height=2464, format=(string)NV12, framerate=(fraction)3/1 \
-    ! nvvidconv ! video/x-raw, width=(int)800, height=(int)600, format=(string)BGRx \
-    ! videoconvert \
-    ! appsink'
+computer_flag = 1 #jetson nano +picam = 0 , thinkpad e450 = 1
+
+#jetson nano or thinkpad e450
+if computer_flag == 0:
+    GST_STR = 'nvarguscamerasrc \
+        ! video/x-raw(memory:NVMM), width=3280, height=2464, format=(string)NV12, framerate=(fraction)3/1 \
+        ! nvvidconv ! video/x-raw, width=(int)800, height=(int)600, format=(string)BGRx \
+        ! videoconvert \
+        ! appsink'
+
+    capture = cv2.VideoCapture(GST_STR,cv2.CAP_GSTREAMER)
+elif computer_flag == 1:
+    capture = cv2.VideoCapture(-1)
 
 placards_path = "./hazmat-placards/"
 
@@ -105,7 +112,7 @@ kp_des_list.append((kp24,des24))
 kp_des_list.append((kp25,des25))
 kp_des_list.append((kp26,des26))
 
-capture = cv2.VideoCapture(GST_STR,cv2.CAP_GSTREAMER)
+
 
 #------------------------------------------------------
 #
