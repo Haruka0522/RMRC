@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+sys.path.remove("/opt/ros/kinetic/lib/python2.7/dist-packages")
 import cv2
 from time import sleep
 import os
@@ -8,7 +10,7 @@ import os
 #syoki settei
 #
 #----------------------------------------------------
-computer_flag = 1 #jetson nano +picam = 0 , thinkpad e450 = 1
+computer_flag = 2 #jetson nano +picam = 0 , thinkpad e450 = 1 , ubuntu16.04 + webcam = 2
 
 #jetson nano or thinkpad e450
 if computer_flag == 0:
@@ -21,6 +23,8 @@ if computer_flag == 0:
     capture = cv2.VideoCapture(GST_STR,cv2.CAP_GSTREAMER)
 elif computer_flag == 1:
     capture = cv2.VideoCapture(-1)
+elif computer_flag == 2:
+     capture = cv2.VideoCapture(0)
 
 placards_path = "./hazmat-placards/"
 
@@ -176,6 +180,9 @@ while True:
         key = cv2.waitKey(1)
         if key == 27: #ESCkey
             break
+    except KeyboardInterrupt:
+        print("Ctrl-C Shutting down")
+        break
     except:
         print("error")
 capture.release()
