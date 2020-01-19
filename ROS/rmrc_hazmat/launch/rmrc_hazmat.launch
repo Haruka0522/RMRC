@@ -6,7 +6,7 @@
     <param name="pixel_format"         value="mjpg"/>
   </node>
 
-  <node pkg="rmrc_hazmat" name="hazmat_node" type="hazmat_classification.py"/>
+  <node pkg="rmrc_hazmat" name="hazmat_node" type="hazmat_detect_recognize.py"/>
 
   <node pkg="rviz" name="rviz" type="rviz"/>
 </launch>

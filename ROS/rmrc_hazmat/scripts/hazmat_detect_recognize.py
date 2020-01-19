@@ -15,7 +15,7 @@ MIN_MATCH_RATING = 0.7
 
 OBJECT_QUANTITY_LIMIT = 2
 
-MIN_LIMIT_KP = 200
+MIN_LIMIT_KP = 30
 
 MIN_HIGHT = 400
 MAX_HIGHT = 800
@@ -144,10 +144,9 @@ class DetectAndRecognize:
                 good = self.matching(clipped_kp,clipped_des,temp_kp,temp_des)
                 ans.append(len(good))
             if max(ans) > MIN_LIMIT_KP:
-                #what_hazmat = hazmat_list[ans.index(max(ans))][1]
-                #cv2.putText(cv_result,what_hazmat,(x,y),cv2.FONT_HERSHEY_SIMPLEX,2,(200,0,0))
-            else:
-                #cv2.rectangle(cv_result,(x,y),(x+w,y+h),(0,0,255),7)
+                what_hazmat = hazmat_list[ans.index(max(ans))][1]
+                cv2.putText(cv_result,what_hazmat,(x,y),cv2.FONT_HERSHEY_SIMPLEX,2,(200,0,0))
+            cv2.rectangle(cv_result,(x,y),(x+w,y+h),(0,0,255),7)
         """ここまで画像に対する処理"""
 
         #OpenCVの形式の画像をROSで扱える形式にconvert
