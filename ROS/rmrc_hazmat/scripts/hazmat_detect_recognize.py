@@ -9,7 +9,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge,CvBridgeError
 
 
-HAZMAT_PLACARDS_PATH = "/home/haruka/catkin_ws/src/rmrc_hazmat/hazmat-placards/"
+HAZMAT_PLACARDS_PATH = "/home/haruka/catkin_ws/src/rmrc_hazmat/hazmat_label2020/"
 
 MIN_MATCH_RATING = 0.7
 
@@ -18,39 +18,28 @@ OBJECT_QUANTITY_LIMIT = 2
 MIN_LIMIT_KP = 30
 
 MIN_HIGHT = 400
-MAX_HIGHT = 800
+MAX_HIGHT = 1200#800
 MIN_WIDTH = 400
-MAX_WIDTH = 800
+MAX_WIDTH = 1500#800
 
 detector = cv2.xfeatures2d.SIFT_create()
 
 hazmat_list = []
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"1.png"),"1.1 Explosives"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"2.png"),"1.2 Explosives"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"3.png"),"1.3 Explosives"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"4.png"),"1.4 Explosives"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"5.png"),"1.5 Blasting Agent"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"6.png"),"1.6 Explosives"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"7.png"),"Flammable Gas"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"8.png"),"Inhalation Hazard 2"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"9.png"),"Non Flammable Gas"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"10.png"),"Oxygen"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"11.png"),"Combustible"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"12.png"),"Flammable"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"13.png"),"Fuel Oil"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"14.png"),"Gasoline"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"15.png"),"Dangerous When Wet"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"16.png"),"Flammable Solid"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"17.png"),"Spontaneously Combustiblle"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"18.png"),"Oxidizer"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"19.png"),"Organic Peroxide"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"20.png"),"Inhalation Hazard 6"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"21.png"),"Poison"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"22.png"),"Toxic"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"23.png"),"Radioactive"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"24.png"),"Corrosive"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"25.png"),"Other Dangerous Goods"))
-hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"26.png"),"Dangerous"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-1.3-explosive.png"),"1.3 Explosives"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-1.4-explosive.png"),"1.4 Explosives"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-1.5-blasting-agent.png"),"1.5 Blasting Agent"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-2-flammable-gas.png"),"Flammable Gas"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-2-poison-gas.png"),"Poison Gas"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-3-flammable-liquid.png"),"Flammable Liquid"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-4-dangerous-when-wet.png"),"Dangerous When Wet"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-4-spontaneously-combustible.png"),"Spontaneously Combustible"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-5.1-oxidizer.png"),"Oxidizer"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-6-infectious-substance.png"),"Infectious Substance"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-6-poison-inhalation-hazard.png"),"Poison Inhalation Hazard"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-6-poison.png"),"Poison"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-7-radioactive-ii.png"),"Radioactive ii"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-7-radioactive-iii.png"),"Radioactive iii"))
+hazmat_list.append((cv2.imread(HAZMAT_PLACARDS_PATH+"label-8-corrosive.png"),"Corrosive"))
 
 kp1 , des1 = detector.detectAndCompute(hazmat_list[0][0] ,None)
 kp2 , des2 = detector.detectAndCompute(hazmat_list[1][0] ,None)
@@ -67,17 +56,6 @@ kp12,des12 = detector.detectAndCompute(hazmat_list[11][0],None)
 kp13,des13 = detector.detectAndCompute(hazmat_list[12][0],None)
 kp14,des14 = detector.detectAndCompute(hazmat_list[13][0],None)
 kp15,des15 = detector.detectAndCompute(hazmat_list[14][0],None)
-kp16,des16 = detector.detectAndCompute(hazmat_list[15][0],None)
-kp17,des17 = detector.detectAndCompute(hazmat_list[16][0],None)
-kp18,des18 = detector.detectAndCompute(hazmat_list[17][0],None)
-kp19,des19 = detector.detectAndCompute(hazmat_list[18][0],None)
-kp20,des20 = detector.detectAndCompute(hazmat_list[19][0],None)
-kp21,des21 = detector.detectAndCompute(hazmat_list[20][0],None)
-kp22,des22 = detector.detectAndCompute(hazmat_list[21][0],None)
-kp23,des23 = detector.detectAndCompute(hazmat_list[22][0],None)
-kp24,des24 = detector.detectAndCompute(hazmat_list[23][0],None)
-kp25,des25 = detector.detectAndCompute(hazmat_list[24][0],None)
-kp26,des26 = detector.detectAndCompute(hazmat_list[25][0],None)
 
 kp_des_list = []
 kp_des_list.append((kp1 ,des1))
@@ -95,24 +73,13 @@ kp_des_list.append((kp12,des12))
 kp_des_list.append((kp13,des13))
 kp_des_list.append((kp14,des14))
 kp_des_list.append((kp15,des15))
-kp_des_list.append((kp16,des16))
-kp_des_list.append((kp17,des17))
-kp_des_list.append((kp18,des18))
-kp_des_list.append((kp19,des19))
-kp_des_list.append((kp20,des20))
-kp_des_list.append((kp21,des21))
-kp_des_list.append((kp22,des22))
-kp_des_list.append((kp23,des23))
-kp_des_list.append((kp24,des24))
-kp_des_list.append((kp25,des25))
-kp_des_list.append((kp26,des26))
 
 rospy.loginfo("finished setting")
 
 
 class DetectAndRecognize:
     def __init__(self):
-        self.image_pub = rospy.Publisher("hazmat",Image,queue_size=10)
+        self.image_pub = rospy.Publisher("hazmat",Image,queue_size=5)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/image_raw",Image,self.callback)
 
