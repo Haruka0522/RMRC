@@ -1,189 +1,161 @@
-import numpy as np
-import sys
-sys.path.remove("/opt/ros/kinetic/lib/python2.7/dist-packages")
 import cv2
-from time import sleep
-import os
+import numpy as np
 
-#----------------------------------------------------
+#------------------------------------------------------------
 #
-#syoki settei
+#Constant Definition
 #
-#----------------------------------------------------
-computer_flag = 2 #jetson nano +picam = 0 , thinkpad e450 = 1 , ubuntu16.04 + webcam = 2
+#------------------------------------------------------------
+RESIZE_RATIO = 0.3
 
-#jetson nano or thinkpad e450
-if computer_flag == 0:
-    GST_STR = 'nvarguscamerasrc \
-        ! video/x-raw(memory:NVMM), width=3280, height=2464, format=(string)NV12, framerate=(fraction)3/1 \
-        ! nvvidconv ! video/x-raw, width=(int)800, height=(int)600, format=(string)BGRx \
-        ! videoconvert \
-        ! appsink'
+MIN_MATCH_COUNT = 100
 
-    capture = cv2.VideoCapture(GST_STR,cv2.CAP_GSTREAMER)
-elif computer_flag == 1:
-    capture = cv2.VideoCapture(-1)
-elif computer_flag == 2:
-     capture = cv2.VideoCapture(0)
+MIN_AREA = 35000
 
-placards_path = "./hazmat-placards/"
+MATCHING_RATIO = 0.6
 
-MIN_MATCH_RATING = 0.6
+CLASSES_COUNT = 1
 
-detector = cv2.xfeatures2d.SIFT_create()
+TEMPLATE_IMAGES_PATH = "/home/haruka/RMRC/hazmat_label2020/"
 
-#hazmat_list = [(img1,name1),(img2,name2),...,(img26,name26)]
+
+#------------------------------------------------------------
+#
+#Function definition
+#
+#------------------------------------------------------------
+def display(cv_img):
+    cv2.imshow("result",cv_img)
+    cv2.waitKey(1)
+
+def gamma_filter(cv_img):
+    gamma_cvt = np.zeros((256,1),dtype='uint8')
+    for i in range(256):
+        gamma_cvt[i][0] = 255*(float(i)/255)**(1.0/1.8)
+    result = cv2.LUT(cv_img,gamma_cvt)
+    return result
+
+def template_resizer(cv_img):
+    h = cv_img[0]
+    w = cv_img[1]
+    result = cv2.resize(cv_img,(int(h*RESIZE_RATIO),int(w*RESIZE_RATIO)))
+    return result
+
+#------------------------------------------------------------
+#
+#Import Template Images
+#
+#------------------------------------------------------------
 hazmat_list = []
-hazmat_list.append((cv2.imread(placards_path+"1.png"),"1.1 Explosives"))
-hazmat_list.append((cv2.imread(placards_path+"2.png"),"1.2 Explosives"))
-hazmat_list.append((cv2.imread(placards_path+"3.png"),"1.3 Explosives"))
-hazmat_list.append((cv2.imread(placards_path+"4.png"),"1.4 Explosives"))
-hazmat_list.append((cv2.imread(placards_path+"5.png"),"1.5 Blasting Agent"))
-hazmat_list.append((cv2.imread(placards_path+"6.png"),"1.6 Explosives"))
-hazmat_list.append((cv2.imread(placards_path+"7.png"),"Flammable Gas"))
-hazmat_list.append((cv2.imread(placards_path+"8.png"),"Inhalation Hazard 2"))
-hazmat_list.append((cv2.imread(placards_path+"9.png"),"Non Flammable Gas"))
-hazmat_list.append((cv2.imread(placards_path+"10.png"),"Oxygen"))
-hazmat_list.append((cv2.imread(placards_path+"11.png"),"Combustible"))
-hazmat_list.append((cv2.imread(placards_path+"12.png"),"Flammable"))
-hazmat_list.append((cv2.imread(placards_path+"13.png"),"Fuel Oil"))
-hazmat_list.append((cv2.imread(placards_path+"14.png"),"Gasoline"))
-hazmat_list.append((cv2.imread(placards_path+"15.png"),"Dangerous When Wet"))
-hazmat_list.append((cv2.imread(placards_path+"16.png"),"Flammable Solid"))
-hazmat_list.append((cv2.imread(placards_path+"17.png"),"Spontaneously Combustible"))
-hazmat_list.append((cv2.imread(placards_path+"18.png"),"Oxidizer"))
-hazmat_list.append((cv2.imread(placards_path+"19.png"),"Organic Peroxide"))
-hazmat_list.append((cv2.imread(placards_path+"20.png"),"Inhalation Hazard 6"))
-hazmat_list.append((cv2.imread(placards_path+"21.png"),"Poison"))
-hazmat_list.append((cv2.imread(placards_path+"22.png"),"Toxic"))
-hazmat_list.append((cv2.imread(placards_path+"23.png"),"Radioactive"))
-hazmat_list.append((cv2.imread(placards_path+"24.png"),"Corrosive"))
-hazmat_list.append((cv2.imread(placards_path+"25.png"),"Other Dangerous Goods"))
-hazmat_list.append((cv2.imread(placards_path+"26.png"),"Dangerous"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-1.3-explosive.png"),"1.3 Explosives"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-1.4-explosive.png"),"1.4 Explosives"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-1.5-blasting-agent.png"),"1.5 Blasting Agent"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-2-flammable-gas.png"),"Flammable Gas"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-2-poison-gas.png"),"Poison Gas"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-3-flammable-liquid.png"),"Flammable Liquid"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-4-dangerous-when-wet.png"),"Dangerous When Wet"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-4-spontaneously-combustible.png"),"Spontaneously Combustible"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-5.1-oxidizer.png"),"Oxidizer"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-6-infectious-substance.png"),"Infectious Substance"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-6-poison-inhalation-hazard.png"),"Inhalation Hazard"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-6-poison.png"),"Poison"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-7-radioactive-ii.png"),"Radioactive ii"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-7-radioactive-iii.png"),"Radioactive iii"))
+hazmat_list.append((cv2.imread(TEMPLATE_IMAGES_PATH+"label-8-corrosive.png"),"Corrosive"))
 
-kp1,des1 = detector.detectAndCompute(hazmat_list[0][0],None)
-kp2,des2 = detector.detectAndCompute(hazmat_list[1][0],None)
-kp3,des3 = detector.detectAndCompute(hazmat_list[2][0],None)
-kp4,des4 = detector.detectAndCompute(hazmat_list[3][0],None)
-kp5,des5 = detector.detectAndCompute(hazmat_list[4][0],None)
-kp6,des6 = detector.detectAndCompute(hazmat_list[5][0],None)
-kp7,des7 = detector.detectAndCompute(hazmat_list[6][0],None)
-kp8,des8 = detector.detectAndCompute(hazmat_list[7][0],None)
-kp9,des9 = detector.detectAndCompute(hazmat_list[8][0],None)
-kp10,des10 = detector.detectAndCompute(hazmat_list[9][0],None)
-kp11,des11 = detector.detectAndCompute(hazmat_list[10][0],None)
-kp12,des12 = detector.detectAndCompute(hazmat_list[11][0],None)
-kp13,des13 = detector.detectAndCompute(hazmat_list[12][0],None)
-kp14,des14 = detector.detectAndCompute(hazmat_list[13][0],None)
-kp15,des15 = detector.detectAndCompute(hazmat_list[14][0],None)
-kp16,des16 = detector.detectAndCompute(hazmat_list[15][0],None)
-kp17,des17 = detector.detectAndCompute(hazmat_list[16][0],None)
-kp18,des18 = detector.detectAndCompute(hazmat_list[17][0],None)
-kp19,des19 = detector.detectAndCompute(hazmat_list[18][0],None)
-kp20,des20 = detector.detectAndCompute(hazmat_list[19][0],None)
-kp21,des21 = detector.detectAndCompute(hazmat_list[20][0],None)
-kp22,des22 = detector.detectAndCompute(hazmat_list[21][0],None)
-kp23,des23 = detector.detectAndCompute(hazmat_list[22][0],None)
-kp24,des24 = detector.detectAndCompute(hazmat_list[23][0],None)
-kp25,des25 = detector.detectAndCompute(hazmat_list[24][0],None)
-kp26,des26 = detector.detectAndCompute(hazmat_list[25][0],None)
+
+#------------------------------------------------------------
+#
+#Preparation
+#
+#------------------------------------------------------------
+sift = cv2.xfeatures2d.SIFT_create()
+
+kp1 , des1 = sift.detectAndCompute(hazmat_list[0][0] ,None)
+kp2 , des2 = sift.detectAndCompute(hazmat_list[1][0] ,None)
+kp3 , des3 = sift.detectAndCompute(hazmat_list[2][0] ,None)
+kp4 , des4 = sift.detectAndCompute(hazmat_list[3][0] ,None)
+kp5 , des5 = sift.detectAndCompute(hazmat_list[4][0] ,None)
+kp6 , des6 = sift.detectAndCompute(hazmat_list[5][0] ,None)
+kp7 , des7 = sift.detectAndCompute(hazmat_list[6][0] ,None)
+kp8 , des8 = sift.detectAndCompute(hazmat_list[7][0] ,None)
+kp9 , des9 = sift.detectAndCompute(hazmat_list[8][0] ,None)
+kp10,des10 = sift.detectAndCompute(hazmat_list[9][0] ,None)
+kp11,des11 = sift.detectAndCompute(hazmat_list[10][0],None)
+kp12,des12 = sift.detectAndCompute(hazmat_list[11][0],None)
+kp13,des13 = sift.detectAndCompute(hazmat_list[12][0],None)
+kp14,des14 = sift.detectAndCompute(hazmat_list[13][0],None)
+kp15,des15 = sift.detectAndCompute(hazmat_list[14][0],None)
 
 kp_des_list = []
-kp_des_list.append((kp1,des1))
-kp_des_list.append((kp2,des2))
-kp_des_list.append((kp3,des3))
-kp_des_list.append((kp4,des4))
-kp_des_list.append((kp5,des5))
-kp_des_list.append((kp6,des6))
-kp_des_list.append((kp7,des7))
-kp_des_list.append((kp8,des8))
-kp_des_list.append((kp9,des9))
+kp_des_list.append((kp1 ,des1))
+kp_des_list.append((kp2 ,des2))
+kp_des_list.append((kp3 ,des3))
+kp_des_list.append((kp4 ,des4))
+kp_des_list.append((kp5 ,des5))
+kp_des_list.append((kp6 ,des6))
+kp_des_list.append((kp7 ,des7))
+kp_des_list.append((kp8 ,des8))
+kp_des_list.append((kp9 ,des9))
 kp_des_list.append((kp10,des10))
 kp_des_list.append((kp11,des11))
 kp_des_list.append((kp12,des12))
 kp_des_list.append((kp13,des13))
 kp_des_list.append((kp14,des14))
 kp_des_list.append((kp15,des15))
-kp_des_list.append((kp16,des16))
-kp_des_list.append((kp17,des17))
-kp_des_list.append((kp18,des18))
-kp_des_list.append((kp19,des19))
-kp_des_list.append((kp20,des20))
-kp_des_list.append((kp21,des21))
-kp_des_list.append((kp22,des22))
-kp_des_list.append((kp23,des23))
-kp_des_list.append((kp24,des24))
-kp_des_list.append((kp25,des25))
-kp_des_list.append((kp26,des26))
 
 
 
-#------------------------------------------------------
-#
-#kansu tachi
-#
-#------------------------------------------------------
-def Matching(camera_kp,camera_des,template_kp,template_des):
-
-    FLANN_INDEX_KDTREE = 0
-    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
-    search_params = dict(checks = 50)
-    flann = cv2.FlannBasedMatcher(index_params, search_params)
-    matches = flann.knnMatch(template_des, camera_des, k=2)
-
-    # store all the good matches as per Lowe's ratio test.
-    good = []
-    for m,n in matches:
-    	if m.distance < MIN_MATCH_RATING*n.distance:
-    		good.append(m)
-
-    # return the number of matches (the tutorial describes how to draw the features if interested)
-    return good
-
-#------------------------------------------------------
-#
-#main loop
-#
-#------------------------------------------------------
-while True:
-    try:
-        cam_ret,cam_img = capture.read()
-        if cam_ret != True:
-            print("No ret")
-            continue
-        cam_gray_img = cv2.cvtColor(cam_img,cv2.COLOR_BGR2GRAY)
-
-        '''kakitashi hajimari'''
-        cam_gray_img_blured = cv2.GaussianBlur(cam_gray_img,(11,11),0)
-        binarized_img = cv2.threshold(cam_gray_img_blured,0,255,cv2.THRESH_OTSU)[1]
-        cnts = cv2.findContours(binarized_img,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)[1]
-        for pt in cnts:
-            x,y,w,h = cv2.boundingRect(pt)
-            if w<200 or h<200 or w==800 or h==600:
+def main():
+    capture = cv2.VideoCapture(2)
+    sift = cv2.xfeatures2d.SIFT_create()
+    while True:
+        try:
+            cam_ret,cam_img = capture.read()
+            if cam_ret != True:
+                print("No ret")
                 continue
-            clipped_img = cam_gray_img[y:(y+h),x:(x+w)]
+            result_img = cam_img.copy()
+            kp_cam,des_cam = sift.detectAndCompute(cam_img,None)
+            for i,(kp_temp,des_temp) in enumerate(kp_des_list):
+                bf = cv2.BFMatcher()
+                matches = bf.knnMatch(des_temp,des_cam,k=2)
+                good = []
+                for m,n in matches:
+                    if m.distance < MATCHING_RATIO * n.distance:
+                        good.append(m)
+                #print(len(good))
+                if len(good) > MIN_MATCH_COUNT:
+                    src_pts = np.float32([kp_temp[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
+                    dst_pts = np.float32([ kp_cam[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
+                    M, mask = cv2.findHomography(src_pts,dst_pts,cv2.RANSAC,5.0)
+                    matchesMask = mask.ravel().tolist()
+                    h,w = 1188,1188 #h,w = temp_img.shape
+                    pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+                    dst = cv2.perspectiveTransform(pts,M)
+                    #print(cv2.contourArea(np.int32(dst))) 面積デバッグ
+                    if cv2.contourArea(np.int32(dst)) < MIN_AREA:
+                        continue
+                    result_img = cv2.polylines(cam_img,[np.int32(dst)],True,(0,255,0),8,cv2.LINE_AA)
+                    result_img = cv2.putText(result_img,hazmat_list[i][1],tuple(dst[1,0]),cv2.FONT_HERSHEY_SIMPLEX,1.0,(0,255,0),thickness=3)
+                else:
+                    matchesMask = None
+                #draw_params = dict(matchColor = (0,255,0), #matching line color (green)
+                #                   singlePointColor = None,
+                #                   matchesMask = matchesMask, #only inliers
+                #                   flags = 2)
+                #result_img = cv2.drawMatches(hazmat_list[i][0],kp_temp,cam_img,kp_cam,good,None,**draw_params)
+            display(result_img)
 
-
-            cam_kp,cam_des = detector.detectAndCompute(clipped_img,None)
-            ans = []
-            for temp_kp,temp_des in kp_des_list:
-                good = Matching(cam_kp,cam_des,temp_kp,temp_des)
-                ans.append(len(good))
-            what_hazmat = hazmat_list[ans.index(max(ans))][1]
-            cv2.rectangle(cam_img,(x,y),(x+w,y+h),(0,0,255),7)
-            cv2.putText(cam_img,what_hazmat,(x,y),cv2.FONT_HERSHEY_SIMPLEX,1,(200,0,0))
-        cv2.imshow("Result",cam_img)
-        '''kakitashi owari'''
-
-        print(capture.get(cv2.CAP_PROP_FPS))
-
-        key = cv2.waitKey(1)
-        if key == 27: #ESCkey
+        except KeyboardInterrupt:
+            print("Ctrl-C Shutting down")
             break
-    except KeyboardInterrupt:
-        print("Ctrl-C Shutting down")
-        break
-    except:
-        print("error")
-capture.release()
-cv2.destroyAllWindows()
+        except:
+            print("Error")
+    capture.release()
+    cv2.destoryAllWindows()
+
+
+if __name__ == '__main__':
+    main()
+
