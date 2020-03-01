@@ -1,8 +1,8 @@
 <launch>
   <node pkg="uvc_camera" name="camera_node" type="uvc_camera_node">
     <param name="device" type="string" value="/dev/video0"/>
-    <param name="width"  type="int"    value="1920"/>
-    <param name="height" type="int"    value="1080"/>
+    <param name="width"  type="int"    value="800"/>
+    <param name="height" type="int"    value="600"/>
     <param name="pixel_format"         value="mjpg"/>
   </node>
 
