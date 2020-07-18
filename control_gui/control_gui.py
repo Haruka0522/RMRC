@@ -80,13 +80,14 @@ class MyWindow(QWidget):
         self.main_layout.addLayout(self.sliders_layout,1,1)
 
     def create_3Dmodel(self):
-        # source
-        cylinder = vtk.vtkCylinderSource()
-        cylinder.SetResolution(20)
+        # read stl file
+        threed_model = vtk.vtkSTLReader()
+        threed_model.SetFileName("sample.stl")
+        threed_model.Update()
 
         # mapper
         mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputConnection(cylinder.GetOutputPort())
+        mapper.SetInputConnection(threed_model.GetOutputPort())
 
         # actor
         actor = vtk.vtkActor()
