@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QWidget, QApplication, QSlider, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QMainWindow,QDesktopWidget
+from PyQt5.QtWidgets import QWidget, QApplication, QSlider, QGridLayout, QVBoxLayout, QHBoxLayout, QLabel, QFrame, QMainWindow, QDesktopWidget
 from PyQt5.QtGui import QImage, QPixmap
 
 import vtk
@@ -31,8 +31,8 @@ class MyWindow(QWidget):
 
         self.create_how_to_image()
         self.create_sliders()
-        self.create_flipper_image()
-        self.create_3Dmodel()
+        # self.create_flipper_image()
+        # self.create_3Dmodel()
 
         self.setWindowTitle(self.title)
         self.setGeometry(0, 0, self.width, self.height)
@@ -47,7 +47,7 @@ class MyWindow(QWidget):
         imageLabel.setPixmap(QPixmap.fromImage(image))
         imageLabel.scaleFactor = 1.0
         image_layout.addWidget(imageLabel)
-        self.main_layout.addLayout(image_layout,1,0)
+        self.main_layout.addLayout(image_layout, 1, 0)
 
     def create_how_to_image(self):
         image_layout = QHBoxLayout()
@@ -56,7 +56,7 @@ class MyWindow(QWidget):
         imageLabel.setPixmap(QPixmap.fromImage(image))
         imageLabel.scaleFactor = 1.0
         image_layout.addWidget(imageLabel)
-        self.main_layout.addLayout(image_layout,0,1)
+        self.main_layout.addLayout(image_layout, 0, 1)
 
     def create_sliders(self):
         self.sliders_layout = QHBoxLayout()
@@ -77,9 +77,9 @@ class MyWindow(QWidget):
         self.slider_BR.setMaximum(180)
         self.sliders_layout.addWidget(self.slider_BR)
 
-        self.main_layout.addLayout(self.sliders_layout,1,1)
+        self.main_layout.addLayout(self.sliders_layout, 1, 1)
 
-    def create_3Dmodel(self):
+    def create_3Dmodel(self, rad):
         # read stl file
         threed_model = vtk.vtkSTLReader()
         threed_model.SetFileName("sample.stl")
@@ -90,34 +90,35 @@ class MyWindow(QWidget):
         mapper.SetInputConnection(threed_model.GetOutputPort())
 
         # actor
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-        actor.GetProperty().SetColor(tomato)
-        actor.RotateX(30.)
-        actor.RotateY(-45.)
+        self.actor = vtk.vtkActor()
+        self.actor.SetMapper(mapper)
+        self.actor.GetProperty().SetColor(tomato)
+        # actor.RotateX(30.)
+        # actor.RotateY(-45.)
+        self.actor.RotateWXYZ(rad, 1, 1, 1)
 
         # renderer
-        ren = vtk.vtkRenderer()
-        ren.AddActor(actor)
-        ren.SetBackground(0.1, 0.2, 0.4)
+        self.ren = vtk.vtkRenderer()
+        self.ren.AddActor(self.actor)
+        self.ren.SetBackground(0.1, 0.2, 0.4)
 
         # interactor
-        frame = QFrame()
-        inter = QVTKRenderWindowInteractor(frame)
-        inter.SetInteractorStyle(MouseInteractorStyle())
+        self.frame = QFrame()
+        self.inter = QVTKRenderWindowInteractor(self.frame)
+        self.inter.SetInteractorStyle(MouseInteractorStyle())
 
-        ren_win = inter.GetRenderWindow()
-        ren_win.AddRenderer(ren)
+        self.ren_win = self.inter.GetRenderWindow()
+        self.ren_win.AddRenderer(self.ren)
 
-        ren.ResetCamera()
-        ren.GetActiveCamera().Zoom(1.5)
+        self.ren.ResetCamera()
+        self.ren.GetActiveCamera().Zoom(1.5)
 
-        ren_win.Render()
-        inter.Initialize()
+        self.ren_win.Render()
+        self.inter.Initialize()
 
         model_layout = QVBoxLayout()
-        model_layout.addWidget(frame)
-        self.main_layout.addLayout(model_layout,0,0)
+        model_layout.addWidget(self.frame)
+        self.main_layout.addLayout(model_layout, 0, 0)
 
     def centerOnScreen(self):
         res = QDesktopWidget().screenGeometry()
@@ -130,6 +131,8 @@ class MyWindow(QWidget):
         else:
             self.counter += 1
         self.slider_FR.setValue(self.counter - 180)
+
+        self.create_3Dmodel(self.counter)
         QTimer.singleShot(100, self._run)
 
 
