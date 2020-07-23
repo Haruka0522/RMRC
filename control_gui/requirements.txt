@@ -1,2 +1,7 @@
 PyQt5
 autopep8
+PyOpenGL
+PyOpenGL_accelerate
+numpy-stl
+matplotlib
+vtk
