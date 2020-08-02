@@ -86,6 +86,8 @@ class Robot3DModel(QVBoxLayout):
         ren_win.Render()
         inter.Initialize()
 
+        self.inter = inter
+
         self.addWidget(frame)
 
     def update_FL(self, angle):
@@ -168,6 +170,7 @@ class UiMainWindow(QWidget):
         self.slider.update_FR(self.counter - 90)
         self.model.update_FL(self.counter - 180)
         self.model.update_FR(self.counter - 90)
+        self.model.inter.update()
         QTimer.singleShot(100, self.run)
 
 
